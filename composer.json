@@ -1,0 +1,43 @@
+{
+  "name": "drd-plus/rest-calculator",
+  "license": "MIT",
+  "type": "project",
+  "description": "Healing and resting in DrD+",
+  "keywords": [
+    "DrD",
+    "DrD plus",
+    "heal",
+    "wounds",
+    "fatigue",
+    "rest"
+  ],
+  "autoload": {
+    "psr-4": {
+      "DrdPlus\\": "DrdPlus/"
+    }
+  },
+  "require": {
+    "php": ">=7.1",
+    "granam/strict-object": "dev-master",
+    "drd-plus/tables": "dev-master",
+    "drd-plus/calculator-skeleton": "dev-master",
+    "drd-plus/skills": "dev-master",
+    "drd-plus/health": "dev-master",
+    "drd-plus/stamina": "dev-master"
+  },
+  "require-dev": {
+    "roave/security-advisories": "dev-master",
+    "phpunit/phpunit": "~6.0",
+    "mockery/mockery": "~1.0",
+    "granam/exceptions-hierarchy": "~4.0"
+  },
+  "minimum-stability": "dev",
+  "prefer-stable": true,
+  "scripts": {
+    "pre-autoload-dump": [
+      "rm -fr ./css/generic && ln -s ../vendor/drd-plus/calculator-skeleton/css/generic ./css/generic",
+      "rm -fr ./js/generic && ln -s ../vendor/drd-plus/calculator-skeleton/js/generic ./js/generic",
+      "rm -fr ./images/generic && ln -s ../vendor/drd-plus/calculator-skeleton/images/generic ./images/generic"
+    ]
+  }
+}
