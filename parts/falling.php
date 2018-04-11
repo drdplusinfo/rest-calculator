@@ -9,7 +9,7 @@ use DrdPlus\Codes\Transport\RidingAnimalCode;
         <div class="panel">
             <label>
                 <input id="onHorseback" type="radio" value="<?= $controller::HORSEBACK ?>"
-                       name="<?= $controller::FALLING_FROM ?>"
+                       name="<?= $controller::SERIOUS_WOUND_ORIGINS ?>"
                        required
                        <?php if ($controller->isFallingFromHorseback()) { ?>checked="checked" <?php } ?>>
                 <strong>padáš z "koně"</strong>
@@ -31,7 +31,7 @@ use DrdPlus\Codes\Transport\RidingAnimalCode;
             <label>
                 při jeho skoku
                 <input type="checkbox" class="horseRelated"
-                       name="<?= $controller::HORSE_IS_JUMPING ?>"
+                       name="<?= $controller::HEALING_CONDITIONS_PERCENTS ?>"
                        <?php if ($controller->isHorseJumping()) { ?>checked="checked"<?php } ?>>
             </label>
         </div>
@@ -54,7 +54,7 @@ use DrdPlus\Codes\Transport\RidingAnimalCode;
             <div class="panel">
                 <label>
                     <input type="radio" value="<?= $controller::HEIGHT ?>"
-                           name="<?= $controller::FALLING_FROM ?>"
+                           name="<?= $controller::SERIOUS_WOUND_ORIGINS ?>"
                            required
                            <?php if ($controller->isFallingFromHeight()) { ?>checked="checked" <?php } ?>>
                     <strong>padáš z výšky</strong>
@@ -68,7 +68,7 @@ use DrdPlus\Codes\Transport\RidingAnimalCode;
         </div>
         <div class="block">
             <label>spadeš na
-                <select name="<?= $controller::SURFACE ?>">
+                <select name="<?= $controller::WOUND_SIZES ?>">
                     <?php foreach ($controller->getSurfaces() as $surface) { ?>
                         <option value="<?= $surface->getValue() ?>"
                                 <?php if ($controller->isSurfaceSelected($surface)) { ?>selected<?php } ?>>
@@ -79,7 +79,7 @@ use DrdPlus\Codes\Transport\RidingAnimalCode;
         </div>
         <div class="block">
             <label>padáš na hlavu <span class="hint">(+2 ZZ)</span>
-                <input name="<?= $controller::HEAD ?>" value="1" type="checkbox"
+                <input name="<?= $controller::CONDITIONS_AFFECTING_HEALING ?>" value="1" type="checkbox"
                        <?php if ($controller->isHitToHead()) { ?>checked="checked" <?php } ?>>
             </label>
         </div>
@@ -95,7 +95,7 @@ use DrdPlus\Codes\Transport\RidingAnimalCode;
         <div class="block">
             <label title="třeba poník váží 240 kg, válečný kůň 700 kg, slon 6 tun, ale nespadnou na tebe celí">váha
                 věcí, které spadly na tebe <span class="hint">(zbroj nepočítej)</span>
-                <input name="<?= $controller::ITEMS_WEIGHT ?>" type="number" placeholder="váha v kg" class="few-numbers"
+                <input name="<?= $controller::STRENGTH ?>" type="number" placeholder="váha v kg" class="few-numbers"
                        min="0" max="10000"
                        value="<?= $controller->getSelectedItemsWeight() ? $controller->getSelectedItemsWeight()->getValue() : '' ?>">
                 kg

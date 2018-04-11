@@ -7,7 +7,7 @@
         <div class="panel">
             <label>
                 skočils <span class="hint">(pád tě nepřekvapil => výška -2 metry)</span>
-                <input type="checkbox" name="<?= $controller::JUMP_IS_CONTROLLED ?>"
+                <input type="checkbox" name="<?= $controller::TREATMENT_HEALING_POWER ?>"
                        <?php if ($controller->isJumpControlled()) { ?>checked="checked" <?php } ?>>
             </label>
         </div>
@@ -15,7 +15,7 @@
     <div class="block">
         <div class="panel">
             <label>neovládáš tělo <span class="hint">(výsledná obratnost -6)</span>
-                <input id="withoutReaction" type="checkbox" name="<?= $controller::WITHOUT_REACTION ?>" value="1"
+                <input id="withoutReaction" type="checkbox" name="<?= $controller::SUB_RACE ?>" value="1"
                        <?php if ($controller->isWithoutReaction()) { ?>checked="checked"<?php } ?>>
             </label>
         </div>
@@ -23,7 +23,7 @@
     <div class="block">
         <div class="panel">
             <label>obratnost
-                <input id="agility" type="number" class="single-number" name="<?= $controller::AGILITY ?>" min="-40" max="40"
+                <input id="agility" type="number" class="single-number" name="<?= $controller::RACE ?>" min="-40" max="40"
                        required value="<?= $controller->getSelectedAgility()->getValue() ?>">
             </label>
         </div>
@@ -48,7 +48,7 @@
     <div class="block">
         <div class="panel">
             <label>atletika
-                <select name="<?= $controller::ATHLETICS ?>">
+                <select name="<?= $controller::ACTIVITY_AFFECTING_HEALING ?>">
                     <?php foreach (['-', 'I', 'II', 'III'] as $rankValue => $rankName) { ?>
                         <option value="<?= $rankValue ?>"
                             <?php if ($controller->getSelectedAthletics()->getCurrentSkillRank()->getValue() === $rankValue) { ?>

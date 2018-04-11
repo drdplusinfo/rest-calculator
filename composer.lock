@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "d51458ccba7c0b6de2944f4ee6dabcff",
-    "content-hash": "6aea912b75e3169068053334d74aef13",
+    "hash": "9cf40838204232d04a27929ce51395f8",
+    "content-hash": "3dd415651c48dbced3bc58ef07dd829b",
     "packages": [
         {
             "name": "doctrine/annotations",
@@ -1140,12 +1140,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/jaroslavtyc/drd-plus-codes.git",
-                "reference": "83e8fffbe472e67b1a2898c8ee87b56a433ee80d"
+                "reference": "b27799aed5c5e0b827bdcd839d3df91fb873955c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/jaroslavtyc/drd-plus-codes/zipball/83e8fffbe472e67b1a2898c8ee87b56a433ee80d",
-                "reference": "83e8fffbe472e67b1a2898c8ee87b56a433ee80d",
+                "url": "https://api.github.com/repos/jaroslavtyc/drd-plus-codes/zipball/b27799aed5c5e0b827bdcd839d3df91fb873955c",
+                "reference": "b27799aed5c5e0b827bdcd839d3df91fb873955c",
                 "shasum": ""
             },
             "require": {
@@ -1171,7 +1171,7 @@
                 "MIT"
             ],
             "description": "Codes of Drd+ races, properties",
-            "time": "2018-04-04 04:44:53"
+            "time": "2018-04-10 08:36:47"
         },
         {
             "name": "drd-plus/dice-rolls",
@@ -1237,12 +1237,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/jaroslavtyc/drd-plus-health.git",
-                "reference": "02699edbf25bf6b270a901924bf7fd055d4ce858"
+                "reference": "fc0d5c6a09e49d97f399004da835b80e1e520e30"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/jaroslavtyc/drd-plus-health/zipball/02699edbf25bf6b270a901924bf7fd055d4ce858",
-                "reference": "02699edbf25bf6b270a901924bf7fd055d4ce858",
+                "url": "https://api.github.com/repos/jaroslavtyc/drd-plus-health/zipball/fc0d5c6a09e49d97f399004da835b80e1e520e30",
+                "reference": "fc0d5c6a09e49d97f399004da835b80e1e520e30",
                 "shasum": ""
             },
             "require": {
@@ -1257,13 +1257,13 @@
                 "drd-plus/rolls-on": "dev-master",
                 "drd-plus/skills": "dev-master",
                 "drd-plus/tables": "dev-master",
-                "php": ">=7.1",
-                "roave/security-advisories": "dev-master"
+                "php": ">=7.1"
             },
             "require-dev": {
                 "granam/exceptions-hierarchy": "~4.0",
                 "mockery/mockery": "~1.0",
-                "phpunit/phpunit": "~6.0"
+                "phpunit/phpunit": "~6.0",
+                "roave/security-advisories": "dev-master"
             },
             "type": "project",
             "autoload": {
@@ -1276,7 +1276,7 @@
                 "MIT"
             ],
             "description": "Body and soul harms, afflictions and their treatment of a being for Drd+",
-            "time": "2018-01-07 08:30:56"
+            "time": "2018-04-10 08:40:11"
         },
         {
             "name": "drd-plus/hunting-and-fishing",
@@ -1617,12 +1617,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/jaroslavtyc/drd-plus-tables.git",
-                "reference": "ce3dbdea84d828a1614e0c5f0449667c41444b13"
+                "reference": "ffdb0a58577df6aca6e391c96492520ebda092f0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/jaroslavtyc/drd-plus-tables/zipball/ce3dbdea84d828a1614e0c5f0449667c41444b13",
-                "reference": "ce3dbdea84d828a1614e0c5f0449667c41444b13",
+                "url": "https://api.github.com/repos/jaroslavtyc/drd-plus-tables/zipball/ffdb0a58577df6aca6e391c96492520ebda092f0",
+                "reference": "ffdb0a58577df6aca6e391c96492520ebda092f0",
                 "shasum": ""
             },
             "require": {
@@ -1654,7 +1654,7 @@
                 "MIT"
             ],
             "description": "Drd+ tables and their units conversion",
-            "time": "2018-04-06 15:25:38"
+            "time": "2018-04-10 07:43:45"
         },
         {
             "name": "granam/boolean",
@@ -2560,7 +2560,7 @@
             ],
             "authors": [
                 {
-                    "name": "Pádraic Brady",
+                    "name": "Padraic Brady",
                     "email": "padraic.brady@gmail.com",
                     "homepage": "http://blog.astrumfutura.com"
                 },
@@ -3199,16 +3199,16 @@
         },
         {
             "name": "phpunit/phpunit",
-            "version": "6.5.7",
+            "version": "6.5.8",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/phpunit.git",
-                "reference": "6bd77b57707c236833d2b57b968e403df060c9d9"
+                "reference": "4f21a3c6b97c42952fd5c2837bb354ec0199b97b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/6bd77b57707c236833d2b57b968e403df060c9d9",
-                "reference": "6bd77b57707c236833d2b57b968e403df060c9d9",
+                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/4f21a3c6b97c42952fd5c2837bb354ec0199b97b",
+                "reference": "4f21a3c6b97c42952fd5c2837bb354ec0199b97b",
                 "shasum": ""
             },
             "require": {
@@ -3279,7 +3279,7 @@
                 "testing",
                 "xunit"
             ],
-            "time": "2018-02-26 07:01:09"
+            "time": "2018-04-10 11:38:34"
         },
         {
             "name": "phpunit/phpunit-mock-objects",
