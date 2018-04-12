@@ -12,14 +12,23 @@ use DrdPlus\DiceRolls\Templates\Rolls\Roll2d6DrdPlus;
 use DrdPlus\Health\Afflictions\Affliction;
 use DrdPlus\Health\HealingPower;
 use DrdPlus\Health\Health;
+use DrdPlus\Health\OrdinaryWound;
+use DrdPlus\Health\SeriousWound;
 use DrdPlus\Health\Wound;
 use DrdPlus\Health\WoundSize;
 use DrdPlus\Properties\Base\Strength;
+use DrdPlus\Properties\Base\Will;
+use DrdPlus\Properties\Derived\Endurance;
+use DrdPlus\Properties\Derived\FatigueBoundary;
 use DrdPlus\Properties\Derived\Toughness;
 use DrdPlus\Properties\Derived\WoundBoundary;
+use DrdPlus\Stamina\Fatigue;
+use DrdPlus\Stamina\RestPower;
+use DrdPlus\Stamina\Stamina;
 use DrdPlus\Tables\Body\Healing\HealingConditionsPercents;
 use DrdPlus\Tables\Tables;
 use Granam\Integer\Tools\ToInteger;
+use Granam\Tools\ValueDescriber;
 
 class Controller extends \DrdPlus\Configurator\Skeleton\Controller
 {
@@ -28,14 +37,19 @@ class Controller extends \DrdPlus\Configurator\Skeleton\Controller
     public const ACTIVITY_AFFECTING_HEALING = 'activity_affecting_healing';
     public const ROLL_ON_HEALING = 'roll_on_healing';
     public const HEALING_POWER = 'healing_power';
+    public const REST_POWER = 'rest_power';
     public const HEALED_BY_REGENERATION = 'healing_by_regeneration';
     public const HEALED_BY_TREATMENT = 'healing_by_treatment';
-    public const SERIOUS_WOUND_ORIGINS = 'serious_wound_origins';
-    public const WOUND_SIZES = 'wound_sizes';
+    public const SERIOUS_WOUND_ORIGIN = 'serious_wound_origin';
+    public const WOUND_SIZE = 'wound_size';
     public const STRENGTH = 'strength';
+    public const WILL = 'will';
+    public const FATIGUE = 'fatigue';
     public const TREATMENT_HEALING_POWER = 'treatment_healing_power';
     public const HEALING_CONDITIONS_PERCENTS = 'healing_conditions_percents';
     public const CONDITIONS_AFFECTING_HEALING = 'conditions_affecting_healing';
+    public const WOUND_SIZE_OF_SERIOUS_WOUND_TO_HEAL = 'wound_size_of_serious_wound_to_heal';
+    public const ORIGIN_OF_SERIOUS_WOUND_TO_HEAL = 'origin_of_serious_wound_to_heal';
 
     /** @var Health */
     private $health;
@@ -43,11 +57,22 @@ class Controller extends \DrdPlus\Configurator\Skeleton\Controller
     private $wounds = [];
     /** @var int */
     private $healedAmountOfOrdinaryWounds;
+    /** @var int */
+    private $healedAmountOfSeriousWound;
+    /** @var int */
+    private $restedAmountOfFatigue;
 
     /**
      * @throws \DrdPlus\Health\Exceptions\UnknownAfflictionOriginatingWound
      * @throws \DrdPlus\Health\Exceptions\AfflictionIsAlreadyRegistered
      * @throws \DrdPlus\Health\Exceptions\NeedsToRollAgainstMalusFirst
+     * @throws \DrdPlus\Health\Exceptions\UnknownSeriousWoundToHeal
+     * @throws \DrdPlus\Health\Exceptions\ExpectedFreshWoundToHeal
+     * @throws \DrdPlus\Stamina\Exceptions\NeedsToRollAgainstMalusFirst
+     * @throws \Granam\Integer\Tools\Exceptions\WrongParameterType
+     * @throws \Granam\Integer\Tools\Exceptions\ValueLostOnCast
+     * @throws \Granam\Integer\Tools\Exceptions\PositiveIntegerCanNotBeNegative
+     * @throws \DrdPlus\Calculators\Rest\Exceptions\UnknownSeriousWoundToHeal
      */
     public function __construct()
     {
@@ -55,8 +80,100 @@ class Controller extends \DrdPlus\Configurator\Skeleton\Controller
         $health = new Health();
         $this->addWounds($health)
             ->addAfflictions($health)
-            ->healOrdinaryWounds($health);
+            ->healWounds($health);
         $this->health = $health;
+        $stamina = new Stamina();
+        $this->addFatigues($stamina)
+            ->rest($stamina);
+    }
+
+    /**
+     * @param Stamina $stamina
+     * @return Controller
+     * @throws \DrdPlus\Stamina\Exceptions\NeedsToRollAgainstMalusFirst
+     * @throws \Granam\Integer\Tools\Exceptions\WrongParameterType
+     * @throws \Granam\Integer\Tools\Exceptions\ValueLostOnCast
+     * @throws \Granam\Integer\Tools\Exceptions\PositiveIntegerCanNotBeNegative
+     */
+    private function addFatigues(Stamina $stamina): Controller
+    {
+        foreach ($this->getSelectedFatigues() as $fatigue) {
+            $stamina->addFatigue($fatigue, $this->getCalculatedFatigueBoundary());
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return array|Fatigue[]
+     * @throws \Granam\Integer\Tools\Exceptions\WrongParameterType
+     * @throws \Granam\Integer\Tools\Exceptions\ValueLostOnCast
+     * @throws \Granam\Integer\Tools\Exceptions\PositiveIntegerCanNotBeNegative
+     */
+    public function getSelectedFatigues(): array
+    {
+        $fatigueValues = (array)$this->getValueFromRequest(self::FATIGUE);
+        $fatigueValues = \array_map(function (string $fatigueValue) {
+            return ToInteger::toPositiveInteger($fatigueValue);
+        }, $fatigueValues);
+
+        return \array_map(function (int $fatigueValue) {
+            /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
+            return Fatigue::getIt($fatigueValue);
+        }, $fatigueValues);
+    }
+
+    private function getCalculatedFatigueBoundary(): FatigueBoundary
+    {
+        return FatigueBoundary::getIt($this->getCalculatedEndurance(), Tables::getIt());
+    }
+
+    private function getCalculatedEndurance(): Endurance
+    {
+        return Endurance::getIt($this->getSelectedStrength(), $this->getSelectedWill());
+    }
+
+    /**
+     * @param Stamina $stamina
+     * @return Controller
+     * @throws \DrdPlus\Stamina\Exceptions\NeedsToRollAgainstMalusFirst
+     */
+    private function rest(Stamina $stamina): Controller
+    {
+        $this->restedAmountOfFatigue = $stamina->rest(
+            $this->getSelectedRestPower(),
+            $this->getCalculatedFatigueBoundary(),
+            $this->getCalculatedEndurance(),
+            Tables::getIt()
+        );
+
+        return $this;
+    }
+
+    public function getSelectedRestPower(): RestPower
+    {
+        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
+        return new RestPower((int)$this->getValueFromRequest(self::REST_POWER));
+    }
+
+    /**
+     * @return array|SeriousWound[]
+     */
+    public function getSeriousWounds(): array
+    {
+        return \array_filter($this->wounds, function (Wound $wound) {
+            return $wound->isSerious();
+        });
+    }
+
+    /**
+     * @return array|OrdinaryWound[]
+     */
+    public function getOrdinaryWounds(): array
+    {
+        return \array_filter($this->wounds, function (Wound $wound) {
+            return $wound->isOrdinary();
+        });
     }
 
     /**
@@ -105,7 +222,7 @@ class Controller extends \DrdPlus\Configurator\Skeleton\Controller
                 /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
                 return ToInteger::toInteger($woundSize);
             },
-            $this->getValueFromRequest(self::WOUND_SIZES)
+            $this->getValueFromRequest(self::WOUND_SIZE)
         );
     }
 
@@ -119,7 +236,7 @@ class Controller extends \DrdPlus\Configurator\Skeleton\Controller
                 /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
                 return SeriousWoundOriginCode::getEnum($seriousWoundOrigin);
             },
-            (array)$this->getValueFromRequest(self::SERIOUS_WOUND_ORIGINS)
+            (array)$this->getValueFromRequest(self::SERIOUS_WOUND_ORIGIN)
         );
     }
 
@@ -142,16 +259,105 @@ class Controller extends \DrdPlus\Configurator\Skeleton\Controller
      * @param Health $health
      * @return Controller
      * @throws \DrdPlus\Health\Exceptions\NeedsToRollAgainstMalusFirst
+     * @throws \DrdPlus\Health\Exceptions\UnknownSeriousWoundToHeal
+     * @throws \DrdPlus\Health\Exceptions\ExpectedFreshWoundToHeal
+     * @throws \DrdPlus\Health\Exceptions\NeedsToRollAgainstMalusFirst
+     * @throws \DrdPlus\Calculators\Rest\Exceptions\UnknownSeriousWoundToHeal
      */
-    private function healOrdinaryWounds(Health $health): Controller
+    private function healWounds(Health $health): Controller
     {
-        $this->healedAmountOfOrdinaryWounds = $health->healFreshOrdinaryWounds(
+        $selectedSeriousWoundToHeal = $this->getSelectedSeriousWoundToHeal();
+        if ($selectedSeriousWoundToHeal) {
+            $this->healedAmountOfSeriousWound = $this->healSeriousWound($selectedSeriousWoundToHeal, $health);
+        } else {
+            $this->healedAmountOfOrdinaryWounds = $this->healOrdinaryWounds($health);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param SeriousWound $seriousWound
+     * @param Health $health
+     * @return int
+     * @throws \DrdPlus\Health\Exceptions\UnknownSeriousWoundToHeal
+     * @throws \DrdPlus\Health\Exceptions\ExpectedFreshWoundToHeal
+     * @throws \DrdPlus\Health\Exceptions\NeedsToRollAgainstMalusFirst
+     */
+    private function healSeriousWound(SeriousWound $seriousWound, Health $health): int
+    {
+        return $health->healFreshSeriousWound(
+            $seriousWound,
             $this->getSelectedHealingPower(),
             $this->getCalculatedToughness(),
             Tables::getIt()
         );
+    }
 
-        return $this;
+    /**
+     * @param Health $health
+     * @return int
+     * @throws \DrdPlus\Health\Exceptions\NeedsToRollAgainstMalusFirst
+     */
+    private function healOrdinaryWounds(Health $health): int
+    {
+        return $health->healFreshOrdinaryWounds(
+            $this->getSelectedHealingPower(),
+            $this->getCalculatedToughness(),
+            Tables::getIt()
+        );
+    }
+
+    /**
+     * @return SeriousWound|null
+     * @throws \DrdPlus\Calculators\Rest\Exceptions\UnknownSeriousWoundToHeal
+     */
+    private function getSelectedSeriousWoundToHeal(): ?SeriousWound
+    {
+        $seriousWounds = $this->getSeriousWounds();
+        if (!$seriousWounds) {
+            return null;
+        }
+        $woundSize = $this->getSelectedWoundSizeOfSeriousWoundToHeal();
+        $woundOrigin = $this->getSelectedOriginOfSeriousWoundToHeal();
+        if (!$woundSize || !$woundOrigin) {
+            return null;
+        }
+        foreach ($seriousWounds as $seriousWound) {
+            if ($seriousWound->getWoundSize()->getValue() === $woundSize->getValue()
+                && $seriousWound->getWoundOriginCode()->getValue() === $woundOrigin->getValue()
+            ) {
+                return $seriousWound;
+            }
+        }
+
+        throw new Exceptions\UnknownSeriousWoundToHeal(
+            "Got serious wounds size {$woundSize} and origin '{$woundOrigin}', but we do not have such, only "
+            . ValueDescriber::describe($seriousWounds)
+        );
+    }
+
+    /**
+     * @return WoundSize|null
+     * @throws \DrdPlus\Health\Exceptions\WoundSizeCanNotBeNegative
+     */
+    public function getSelectedWoundSizeOfSeriousWoundToHeal(): ?WoundSize
+    {
+        $woundSize = $this->getValueFromRequest(self::WOUND_SIZE_OF_SERIOUS_WOUND_TO_HEAL);
+
+        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
+        return $woundSize !== null
+            ? WoundSize::createIt((int)$woundSize)
+            : null;
+    }
+
+    public function getSelectedOriginOfSeriousWoundToHeal(): ?SeriousWoundOriginCode
+    {
+        $origin = $this->getValueFromRequest(self::ORIGIN_OF_SERIOUS_WOUND_TO_HEAL);
+
+        return $origin !== null
+            ? SeriousWoundOriginCode::getIt($origin)
+            : null;
     }
 
     /**
@@ -162,6 +368,14 @@ class Controller extends \DrdPlus\Configurator\Skeleton\Controller
         return $this->healedAmountOfOrdinaryWounds;
     }
 
+    /**
+     * @return int
+     */
+    public function getHealedAmountOfSeriousWound(): int
+    {
+        return $this->healedAmountOfSeriousWound;
+    }
+
     public function getCalculatedToughness(): Toughness
     {
         return Toughness::getIt($this->getSelectedStrength(), $this->getSelectedRaceCode(), $this->getSelectedSubRaceCode(), Tables::getIt());
@@ -170,6 +384,11 @@ class Controller extends \DrdPlus\Configurator\Skeleton\Controller
     public function getSelectedStrength(): Strength
     {
         return Strength::getIt((int)$this->getValueFromRequest(self::STRENGTH));
+    }
+
+    public function getSelectedWill(): Will
+    {
+        return Will::getIt((int)$this->getValueFromRequest(self::WILL));
     }
 
     /**

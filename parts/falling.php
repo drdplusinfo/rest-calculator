@@ -9,7 +9,7 @@ use DrdPlus\Codes\Transport\RidingAnimalCode;
         <div class="panel">
             <label>
                 <input id="onHorseback" type="radio" value="<?= $controller::HORSEBACK ?>"
-                       name="<?= $controller::SERIOUS_WOUND_ORIGINS ?>"
+                       name="<?= $controller::SERIOUS_WOUND_ORIGIN ?>"
                        required
                        <?php if ($controller->isFallingFromHorseback()) { ?>checked="checked" <?php } ?>>
                 <strong>padáš z "koně"</strong>
@@ -54,7 +54,7 @@ use DrdPlus\Codes\Transport\RidingAnimalCode;
             <div class="panel">
                 <label>
                     <input type="radio" value="<?= $controller::HEIGHT ?>"
-                           name="<?= $controller::SERIOUS_WOUND_ORIGINS ?>"
+                           name="<?= $controller::SERIOUS_WOUND_ORIGIN ?>"
                            required
                            <?php if ($controller->isFallingFromHeight()) { ?>checked="checked" <?php } ?>>
                     <strong>padáš z výšky</strong>
@@ -68,7 +68,7 @@ use DrdPlus\Codes\Transport\RidingAnimalCode;
         </div>
         <div class="block">
             <label>spadeš na
-                <select name="<?= $controller::WOUND_SIZES ?>">
+                <select name="<?= $controller::WOUND_SIZE ?>">
                     <?php foreach ($controller->getSurfaces() as $surface) { ?>
                         <option value="<?= $surface->getValue() ?>"
                                 <?php if ($controller->isSurfaceSelected($surface)) { ?>selected<?php } ?>>
