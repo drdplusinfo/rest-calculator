@@ -28,6 +28,7 @@ $controller = new Controller();
         <?php include __DIR__ . '/vendor/drd-plus/calculator-skeleton/history_remember.php' ?>
       <div class="block"><?php include __DIR__ . '/parts/body.php'; ?></div>
       <div class="block"><?php include __DIR__ . '/parts/wounds.php'; ?></div>
+      <div class="block"><?php include __DIR__ . '/parts/treatment.php'; ?></div>
       <div class="block"><?php include __DIR__ . '/parts/fatigue.php'; ?></div>
     </form>
       <?php

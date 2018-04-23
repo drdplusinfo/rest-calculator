@@ -49,7 +49,7 @@ namespace DrdPlus\Calculators\Rest;
         <input type="submit" value="přidat">
       </div>
       <div class="block">
-        <div class="block">
+        <div class="panel">
           <h4>Těžká zranění</h4>
             <?php if (!$controller->getSeletedSeriousWounds()) { ?>
               <span class="note">žádné</span>
@@ -62,12 +62,13 @@ namespace DrdPlus\Calculators\Rest;
                         <?= $seriousWound->getWoundOriginCode()->translateTo('cs') ?>
                       <input type="hidden" name="<?= $controller::WOUND_SIZE ?>[]" value="<?= $seriousWound->getValue() ?>">
                       <input type="hidden" name="<?= $controller::SERIOUS_WOUND_ORIGIN ?>[]" value="<?= $seriousWound->getWoundOriginCode()->getValue() ?>">
+                      <input type="number" name="<?= $controller::HEALING_POWER ?>">
                     </li>
                   <?php } ?>
               </ol>
             <?php } ?>
         </div>
-        <div class="block">
+        <div class="panel">
           <h4>Lehká zranění</h4>
           <ul><?php foreach ($controller->getSelectedOrdinaryWounds() as $ordinaryWound) { ?>
               <li>

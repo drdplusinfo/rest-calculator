@@ -9,3 +9,7 @@ h4 {
 h5 {
     margin: 0.5em;
 }
+
+.panel:first-child {
+    margin-right: 1em;
+}
