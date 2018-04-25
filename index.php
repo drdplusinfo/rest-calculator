@@ -6,6 +6,7 @@ include_once __DIR__ . '/vendor/autoload.php';
 error_reporting(-1);
 ini_set('display_errors', '1');
 
+/** @noinspection PhpUnusedLocalVariableInspection */
 $controller = new Controller();
 ?>
 <!DOCTYPE html>
@@ -32,6 +33,7 @@ $controller = new Controller();
       <div class="block"><?php include __DIR__ . '/parts/fatigue.php'; ?></div>
     </form>
       <?php
+      /** @noinspection PhpUnusedLocalVariableInspection */
       $sourceCodeUrl = 'https://github.com/jaroslavtyc/drdplus-calculator-skeleton';
       include __DIR__ . '/vendor/drd-plus/calculator-skeleton/issues.php' ?>
     <script type="text/javascript" src="js/rest.js"></script>

@@ -10,6 +10,15 @@ h5 {
     margin: 0.5em;
 }
 
-.panel:first-child {
+.panel {
     margin-right: 1em;
+}
+
+.panel:last-child {
+    margin-right: 0;
+}
+
+ul {
+    margin: 0;
+    padding-left: 1em;
 }

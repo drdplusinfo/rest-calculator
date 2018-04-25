@@ -18,6 +18,7 @@ namespace DrdPlus\Calculators\Rest;
           vůle <span class="note">(ovlivňuje postihy za zranění a únavu)</span>
           <input type="number" value="<?= $controller->getSelectedWill()->getValue() ?>" name="<?= $controller::WILL ?>">
         </label>
+        <span class="note">výsledná vůle <?= $controller->getFinalWill() ?></span>
       </div>
       <div>
         <label>
@@ -51,7 +52,7 @@ namespace DrdPlus\Calculators\Rest;
       </div>
       <div>
         <label>
-          pohlaví <span class="note">(ovlivňuje postihy (vůli))</span>
+          pohlaví <span class="note">(u krollice ovlivňuje postihy (vůli))</span>
           <select name="<?= $controller::GENDER ?>">
               <?php foreach ($controller->getGenderCodes() as $genderCode) { ?>
                 <option value="<?= $genderCode->getValue() ?>"
@@ -68,6 +69,10 @@ namespace DrdPlus\Calculators\Rest;
     <div class="block">
       <span>celkem životů <?= $controller->getTotalHitPoints() ?>,</span>
       <span>zbývá <?= $controller->getRemainingHitPoints() ?></span>
+    </div>
+    <div class="block">
+      <span class="">celkem výdrže <?= $controller->getTotalStamina() ?></span>,
+      <span class="">zbývá <?= $controller->getRemainingStaminaAmount() ?></span>
     </div>
   </div>
 </fieldset>

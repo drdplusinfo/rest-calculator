@@ -47,7 +47,7 @@ class Controller extends \DrdPlus\Configurator\Skeleton\Controller
     public const WOUND_SIZE = 'wound_size';
     public const STRENGTH = 'strength';
     public const WILL = 'will';
-    public const FATIGUE = 'fatigue.php';
+    public const FATIGUE = 'fatigue';
     public const TREATMENT_HEALING_POWER = 'treatment_healing_power';
     public const HEALING_CONDITIONS_PERCENTS = 'healing_conditions_percents';
     public const CONDITIONS_AFFECTING_HEALING = 'conditions_affecting_healing';
@@ -67,6 +67,8 @@ class Controller extends \DrdPlus\Configurator\Skeleton\Controller
     private $restedAmountOfFatigue;
     /** @var int|null */
     private $newRollAgainstMalusFromWounds;
+    /** @var Stamina */
+    private $stamina;
 
     /**
      * @throws \DrdPlus\Health\Exceptions\UnknownAfflictionOriginatingWound
@@ -91,6 +93,7 @@ class Controller extends \DrdPlus\Configurator\Skeleton\Controller
         $stamina = new Stamina();
         $this->addFatigues($stamina)
             ->rest($stamina);
+        $this->stamina = $stamina;
     }
 
     /**
@@ -119,6 +122,12 @@ class Controller extends \DrdPlus\Configurator\Skeleton\Controller
     public function getSelectedFatigues(): array
     {
         $fatigueValues = (array)$this->getValueFromRequest(self::FATIGUE);
+        $fatigueValues = \array_map(function (string $value) {
+            return \trim($value);
+        }, $fatigueValues);
+        $fatigueValues = \array_filter($fatigueValues, function (string $value) {
+            return $value !== '';
+        });
         $fatigueValues = \array_map(function (string $fatigueValue) {
             return ToInteger::toPositiveInteger($fatigueValue);
         }, $fatigueValues);
@@ -136,7 +145,7 @@ class Controller extends \DrdPlus\Configurator\Skeleton\Controller
 
     private function getCalculatedEndurance(): Endurance
     {
-        return Endurance::getIt($this->getSelectedStrength(), $this->getSelectedWill());
+        return Endurance::getIt($this->getSelectedStrength(), $this->getFinalWill());
     }
 
     /**
@@ -146,12 +155,14 @@ class Controller extends \DrdPlus\Configurator\Skeleton\Controller
      */
     private function rest(Stamina $stamina): Controller
     {
-        $this->restedAmountOfFatigue = $stamina->rest(
-            $this->getSelectedRestPower(),
-            $this->getCalculatedFatigueBoundary(),
-            $this->getCalculatedEndurance(),
-            Tables::getIt()
-        );
+        if ($this->isResting()) { // TODO what about intentional healing
+            $this->restedAmountOfFatigue = $stamina->rest(
+                $this->getSelectedRestPower(),
+                $this->getCalculatedFatigueBoundary(),
+                $this->getCalculatedEndurance(),
+                Tables::getIt()
+            );
+        }
 
         return $this;
     }
@@ -211,7 +222,7 @@ class Controller extends \DrdPlus\Configurator\Skeleton\Controller
     {
         if ($health->needsToRollAgainstMalusFromWounds()) {
             $health->rollAgainstMalusFromWounds(
-                $this->getSelectedWill(),
+                $this->getFinalWill(),
                 $this->getSelectedRollAgainstMalusFromWounds(),
                 $this->getCalculatedWoundBoundary()
             );
@@ -472,14 +483,24 @@ class Controller extends \DrdPlus\Configurator\Skeleton\Controller
         return [];
     }
 
-    public function isAlive(): bool
+    public function isDead(): bool
     {
-        return $this->health->isAlive($this->getCalculatedWoundBoundary());
+        return $this->isDeadBecauseOfWounds() || $this->isDeadBecauseOfFatigue();
+    }
+
+    public function isDeadBecauseOfWounds(): bool
+    {
+        return !$this->health->isAlive($this->getCalculatedWoundBoundary());
+    }
+
+    public function isDeadBecauseOfFatigue(): bool
+    {
+        return !$this->stamina->isAlive($this->getCalculatedFatigueBoundary());
     }
 
     public function isConscious(): bool
     {
-        return $this->health->isConscious($this->getCalculatedWoundBoundary());
+        return $this->health->isConscious($this->getCalculatedWoundBoundary()) && $this->stamina->isConscious($this->getCalculatedFatigueBoundary());
     }
 
     private function getCalculatedWoundBoundary(): WoundBoundary
@@ -587,6 +608,11 @@ class Controller extends \DrdPlus\Configurator\Skeleton\Controller
         return $this->health->getUnhealedWoundsSum();
     }
 
+    public function getSumOfOrdinaryWounds(): int
+    {
+        return $this->health->getUnhealedOrdinaryWoundsSum();
+    }
+
     public function getRemainingHitPoints(): int
     {
         $remainingHitPoints = $this->getTotalHitPoints() - $this->getSumOfWounds();
@@ -644,7 +670,7 @@ class Controller extends \DrdPlus\Configurator\Skeleton\Controller
 
     public function getTotalRollAgainstMalusFromWounds(): int
     {
-        return $this->getSelectedWill()->getValue() + $this->getSelectedRollAgainstMalusFromWounds()->getValue();
+        return $this->getFinalWill()->getValue() + $this->getSelectedRollAgainstMalusFromWounds()->getValue();
     }
 
     public function haveToRollAgainstMalusFromWounds(): bool
@@ -660,5 +686,20 @@ class Controller extends \DrdPlus\Configurator\Skeleton\Controller
         return $bonus >= 0
             ? "+$bonus"
             : (string)$bonus;
+    }
+
+    public function getTotalStamina(): int
+    {
+        return $this->stamina->getStaminaMaximum($this->getCalculatedFatigueBoundary());
+    }
+
+    public function getRemainingStaminaAmount(): int
+    {
+        return $this->stamina->getRemainingStaminaAmount($this->getCalculatedFatigueBoundary());
+    }
+
+    public function getTotalFatigue(): int
+    {
+        return $this->stamina->getFatigue()->getValue();
     }
 }

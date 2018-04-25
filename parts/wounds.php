@@ -9,29 +9,32 @@ namespace DrdPlus\Calculators\Rest;
       <h3>Zranění</h3>
       <div class="block">
         <span>zranění <strong><?= $controller->getSumOfWounds() ?></strong>,</span>
-          <?php if (!$controller->isAlive()) { ?>
-            <span class="">postava je <strong>mrtvá ☠️</strong></span>
-          <?php } elseif (!$controller->isConscious()) { ?>
-            <span class="">postava je <strong>v bezvědomí 😴</strong></span>
-          <?php } else { ?>
-              <?php if ($controller->mayHaveMalusFromWounds() > 0) { ?>
-              <label>
+          <?php if ($controller->isDead()) { ?>
+        <span class="">postava je <strong>mrtvá ☠️</strong>
+            <?php if (!$controller->isDeadBecauseOfWounds()) { ?>
+              <span class="note">(kvůli vyčerpání)</span>
+            <?php }
+            } elseif (!$controller->isConscious()) { ?>
+              <span class="">postava je <strong>v bezvědomí 😴</strong></span>
+            <?php } else { ?>
+                <?php if ($controller->mayHaveMalusFromWounds() > 0) { ?>
+                <label>
                 hod na vůli 2k6<span class="upper-index">+</span>
                 <input type="number" name="<?= $controller::ROLL_AGAINST_MALUS_FROM_WOUNDS ?>" value="<?= $controller->getSelectedRollAgainstMalusFromWounds()->getValue() ?>">
               </label>
-              <button type="submit" name="<?= $controller::SHOULD_ROLL_AGAINST_MALUS_FROM_WOUNDS ?>" value="1" class="manual">
+                <button type="submit" name="<?= $controller::SHOULD_ROLL_AGAINST_MALUS_FROM_WOUNDS ?>" value="1" class="manual">
                 Hodit 2k6<span class="upper-index">+</span>
               </button>
-              <span class="note">+ <?= $controller->getSelectedWill()->getValue() ?>
-                = <?= $controller->getTotalRollAgainstMalusFromWounds() ?></span>
-              <span class="note"><a href="https://pph.drdplus.info/#postih_za_zraneni">(5/10/15)</a> = </span>
-              <?php }
-              if ($controller->getMalusFromWounds() < 0) { ?>
-                <span>postih za zranění <strong><?= $controller->getMalusFromWounds() ?> 🤕</strong></span>
-              <?php } else { ?>
-                <strong>bez postihu 🙂</strong>
-              <?php } ?>
-          <?php } ?>
+                <span class="note">+ <?= $controller->getFinalWill()->getValue() ?>
+                  = <?= $controller->getTotalRollAgainstMalusFromWounds() ?></span>
+                <span class="note"><a href="https://pph.drdplus.info/#postih_za_zraneni">(5/10/15)</a> = </span>
+                <?php }
+                if ($controller->getMalusFromWounds() < 0) { ?>
+                  <span>postih za zranění <strong><?= $controller->getMalusFromWounds() ?> 🤕</strong></span>
+                <?php } else { ?>
+                  <strong>bez postihu 🙂</strong>
+                <?php } ?>
+            <?php } ?>
       </div>
       <div class="block">
         <label>
@@ -46,15 +49,16 @@ namespace DrdPlus\Calculators\Rest;
               <?php } ?>
           </select>
         </label>
-        <input type="submit" value="přidat">
+        <input type="submit" value="zranit">
       </div>
       <div class="block">
+        <hr>
         <div class="panel">
           <h4>Těžká zranění</h4>
             <?php if (!$controller->getSeletedSeriousWounds()) { ?>
               <span class="note">žádné</span>
             <?php } else { ?>
-              <ol>
+              <ul>
                   <?php foreach ($controller->getSeletedSeriousWounds() as $seriousWound) { ?>
                     <li>
                       velikost <?= $seriousWound->getValue() ?>,
@@ -62,21 +66,17 @@ namespace DrdPlus\Calculators\Rest;
                         <?= $seriousWound->getWoundOriginCode()->translateTo('cs') ?>
                       <input type="hidden" name="<?= $controller::WOUND_SIZE ?>[]" value="<?= $seriousWound->getValue() ?>">
                       <input type="hidden" name="<?= $controller::SERIOUS_WOUND_ORIGIN ?>[]" value="<?= $seriousWound->getWoundOriginCode()->getValue() ?>">
-                      <input type="number" name="<?= $controller::HEALING_POWER ?>">
                     </li>
                   <?php } ?>
-              </ol>
+              </ul>
             <?php } ?>
         </div>
         <div class="panel">
           <h4>Lehká zranění</h4>
-          <ul><?php foreach ($controller->getSelectedOrdinaryWounds() as $ordinaryWound) { ?>
-              <li>
-                velikost <?= $ordinaryWound->getValue() ?>,
-                  <?php echo $ordinaryWound->isOld() ? 'staré**' : 'čerstvé*' ?>
-                <input type="hidden" name="<?= $controller::WOUND_SIZE ?>[]" value="<?= $ordinaryWound->getValue() ?>">
-              </li>
-              <?php } ?></ul>
+          <div>celkem <?= $controller->getSumOfOrdinaryWounds() ?></div>
+            <?php foreach ($controller->getSelectedOrdinaryWounds() as $ordinaryWound) { ?>
+              <input type="hidden" name="<?= $controller::WOUND_SIZE ?>[]" value="<?= $ordinaryWound->getValue() ?>">
+            <?php } ?>
         </div>
           <?php if ($controller->hasFreshWounds()) { ?>
             <div class="block">
