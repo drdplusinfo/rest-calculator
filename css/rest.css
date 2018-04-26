@@ -22,3 +22,10 @@ ul {
     margin: 0;
     padding-left: 1em;
 }
+
+button {
+    cursor: pointer;
+}
+button:disabled {
+    cursor: not-allowed;
+}

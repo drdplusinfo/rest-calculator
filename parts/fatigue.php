@@ -7,7 +7,7 @@
     <span class="">bodů únavy <strong><?= $controller->getTotalFatigue() ?></strong></span>,
       <?php if ($controller->isDead()) { ?>
     <span class="">postava je <strong>mrtvá ☠️</strong>
-        <?php if (!$controller->isDeadBecauseOfFatigue()) { ?>
+        <?php if (!$controller->isDeadBecauseOfFatigue() /* may be dead "twice", both from fatigue as well as wounds */) { ?>
           <span class="note">(kvůli zranění)</span>
         <?php }
         } elseif (!$controller->isConscious()) { ?>
@@ -18,7 +18,7 @@
             hod na vůli 2k6<span class="upper-index">+</span>
             <input type="number" name="<?= $controller::ROLL_AGAINST_MALUS_FROM_WOUNDS ?>" value="<?= $controller->getSelectedRollAgainstMalusFromWounds()->getValue() ?>">
           </label>
-            <button type="submit" name="<?= $controller::SHOULD_ROLL_AGAINST_MALUS_FROM_WOUNDS ?>" value="1" class="manual">
+            <button type="submit" name="<?= $controller::USER_ROLL_AGAINST_MALUS_FROM_WOUNDS ?>" value="1" class="manual">
             Hodit 2k6<span class="upper-index">+</span>
           </button>
             <span class="note">+ <?= $controller->getFinalWill()->getValue() ?>
@@ -31,6 +31,7 @@
               <strong>bez postihu 🙂</strong>
             <?php } ?>
         <?php } ?>
+      <a href="https://pph.drdplus.info/#stupne_unavy" class="note">únava v PPH</a>
   </div>
   <div class="block">
     <hr>

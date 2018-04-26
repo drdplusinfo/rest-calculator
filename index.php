@@ -32,6 +32,9 @@ $controller = new Controller();
       <div class="block"><?php include __DIR__ . '/parts/treatment.php'; ?></div>
       <div class="block"><?php include __DIR__ . '/parts/fatigue.php'; ?></div>
     </form>
+    <form method="post" action="" class="block" id="configuratorRest">
+      <div class="block"><?php include __DIR__ . '/parts/rest.php'; ?></div>
+    </form>
       <?php
       /** @noinspection PhpUnusedLocalVariableInspection */
       $sourceCodeUrl = 'https://github.com/jaroslavtyc/drdplus-calculator-skeleton';

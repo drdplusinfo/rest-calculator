@@ -861,12 +861,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/jaroslavtyc/doctrineum-scalar.git",
-                "reference": "2beebc6c6e32ae6c03ee77a2ea386eb5e764cef6"
+                "reference": "1158384533165b092fa5f91e7e691d24f90ab999"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/jaroslavtyc/doctrineum-scalar/zipball/2beebc6c6e32ae6c03ee77a2ea386eb5e764cef6",
-                "reference": "2beebc6c6e32ae6c03ee77a2ea386eb5e764cef6",
+                "url": "https://api.github.com/repos/jaroslavtyc/doctrineum-scalar/zipball/1158384533165b092fa5f91e7e691d24f90ab999",
+                "reference": "1158384533165b092fa5f91e7e691d24f90ab999",
                 "shasum": ""
             },
             "require": {
@@ -909,7 +909,7 @@
                 "sub-type",
                 "value-dependent enum"
             ],
-            "time": "2018-04-20 21:32:01"
+            "time": "2018-04-25 13:30:36"
         },
         {
             "name": "doctrineum/self-registering-type",
@@ -1104,12 +1104,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/jaroslavtyc/drd-plus-calculator-skeleton.git",
-                "reference": "32f9d1c1078937b093fef4ba9c99c27f327caa6d"
+                "reference": "0ae0f69f39d2d482ab5beda8ba7a276c61d3fef0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/jaroslavtyc/drd-plus-calculator-skeleton/zipball/32f9d1c1078937b093fef4ba9c99c27f327caa6d",
-                "reference": "32f9d1c1078937b093fef4ba9c99c27f327caa6d",
+                "url": "https://api.github.com/repos/jaroslavtyc/drd-plus-calculator-skeleton/zipball/0ae0f69f39d2d482ab5beda8ba7a276c61d3fef0",
+                "reference": "0ae0f69f39d2d482ab5beda8ba7a276c61d3fef0",
                 "shasum": ""
             },
             "require": {
@@ -1132,7 +1132,7 @@
                 "MIT"
             ],
             "description": "Style and functionality helper of a DrD+ calculator",
-            "time": "2018-04-19 16:40:27"
+            "time": "2018-04-25 16:48:33"
         },
         {
             "name": "drd-plus/codes",
@@ -1237,12 +1237,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/jaroslavtyc/drd-plus-health.git",
-                "reference": "e1cf131c883d9ebfbc1376dd76b52ebc429b6c1f"
+                "reference": "7257af78fdf15f78af942772355b17b10b121d72"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/jaroslavtyc/drd-plus-health/zipball/e1cf131c883d9ebfbc1376dd76b52ebc429b6c1f",
-                "reference": "e1cf131c883d9ebfbc1376dd76b52ebc429b6c1f",
+                "url": "https://api.github.com/repos/jaroslavtyc/drd-plus-health/zipball/7257af78fdf15f78af942772355b17b10b121d72",
+                "reference": "7257af78fdf15f78af942772355b17b10b121d72",
                 "shasum": ""
             },
             "require": {
@@ -1276,7 +1276,7 @@
                 "MIT"
             ],
             "description": "Body and soul harms, afflictions and their treatment of a being for Drd+",
-            "time": "2018-04-20 21:38:21"
+            "time": "2018-04-26 12:32:06"
         },
         {
             "name": "drd-plus/hunting-and-fishing",
@@ -1573,12 +1573,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/jaroslavtyc/drd-plus-stamina.git",
-                "reference": "c28e322fa43f666340e8dad472d06c849cebb9ca"
+                "reference": "9e92b3aa13d5f7fb011b3e61f6729e6458f0713b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/jaroslavtyc/drd-plus-stamina/zipball/c28e322fa43f666340e8dad472d06c849cebb9ca",
-                "reference": "c28e322fa43f666340e8dad472d06c849cebb9ca",
+                "url": "https://api.github.com/repos/jaroslavtyc/drd-plus-stamina/zipball/9e92b3aa13d5f7fb011b3e61f6729e6458f0713b",
+                "reference": "9e92b3aa13d5f7fb011b3e61f6729e6458f0713b",
                 "shasum": ""
             },
             "require": {
@@ -1609,7 +1609,7 @@
                 "MIT"
             ],
             "description": "Remaining stamina of a body according to its endurance and fatigue for Drd+",
-            "time": "2018-04-12 05:00:40"
+            "time": "2018-04-26 12:04:34"
         },
         {
             "name": "drd-plus/tables",

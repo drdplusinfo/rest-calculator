@@ -43,11 +43,14 @@ class Controller extends \DrdPlus\Configurator\Skeleton\Controller
     public const HEALED_BY_TREATMENT = 'healing_by_treatment';
     public const SERIOUS_WOUND_ORIGIN = 'serious_wound_origin';
     public const ROLL_AGAINST_MALUS_FROM_WOUNDS = 'roll_against_malus_from_wounds';
-    public const SHOULD_ROLL_AGAINST_MALUS_FROM_WOUNDS = 'should_roll_against_malus_from_wounds';
-    public const WOUND_SIZE = 'wound_size';
+    public const USER_ROLL_AGAINST_MALUS_FROM_WOUNDS = 'should_roll_against_malus_from_wounds';
+    public const FRESH_WOUND_SIZE = 'fresh_wound_size';
+    public const OLD_WOUND_SIZE = 'old_wound_size';
     public const STRENGTH = 'strength';
     public const WILL = 'will';
     public const FATIGUE = 'fatigue';
+    public const ROLL_AGAINST_MALUS_FROM_FATIGUE = 'roll_against_malus_from_fatigue';
+    public const SHOULD_ROLL_AGAINST_MALUS_FROM_FATIGUE = 'should_roll_against_malus_from_fatigue';
     public const TREATMENT_HEALING_POWER = 'treatment_healing_power';
     public const HEALING_CONDITIONS_PERCENTS = 'healing_conditions_percents';
     public const CONDITIONS_AFFECTING_HEALING = 'conditions_affecting_healing';
@@ -60,15 +63,19 @@ class Controller extends \DrdPlus\Configurator\Skeleton\Controller
     /** @var Wound[] */
     private $wounds = [];
     /** @var int */
-    private $healedAmountOfOrdinaryWounds;
+    private $regeneratedAmountOfWounds = 0;
     /** @var int */
-    private $healedAmountOfSeriousWound;
+    private $healedAmountOfOrdinaryWounds = 0;
     /** @var int */
-    private $restedAmountOfFatigue;
+    private $healedAmountOfSeriousWound = 0;
+    /** @var int */
+    private $restedAmountOfFatigue = 0;
     /** @var int|null */
     private $newRollAgainstMalusFromWounds;
     /** @var Stamina */
     private $stamina;
+    /** @var int|null */
+    private $newRollAgainstMalusFromFatigue;
 
     /**
      * @throws \DrdPlus\Health\Exceptions\UnknownAfflictionOriginatingWound
@@ -88,7 +95,8 @@ class Controller extends \DrdPlus\Configurator\Skeleton\Controller
         $health = new Health();
         $this->addWounds($health)
             ->addAfflictions($health)
-            ->healWounds($health);
+            ->healWounds($health)
+            ->regenerateFromWounds($health);
         $this->health = $health;
         $stamina = new Stamina();
         $this->addFatigues($stamina)
@@ -108,9 +116,21 @@ class Controller extends \DrdPlus\Configurator\Skeleton\Controller
     {
         foreach ($this->getSelectedFatigues() as $fatigue) {
             $stamina->addFatigue($fatigue, $this->getCalculatedFatigueBoundary());
+            $this->rollAgainstMalusFromFatigueIfNeeded($stamina);
         }
 
         return $this;
+    }
+
+    private function rollAgainstMalusFromFatigueIfNeeded(Stamina $stamina): void
+    {
+        if ($stamina->needsToRollAgainstMalusFromFatigue()) {
+            $stamina->rollAgainstMalusFromFatigue(
+                $this->getFinalWill(),
+                $this->getSelectedRollAgainstMalusFromFatigue(),
+                $this->getCalculatedFatigueBoundary()
+            );
+        }
     }
 
     /**
@@ -155,16 +175,33 @@ class Controller extends \DrdPlus\Configurator\Skeleton\Controller
      */
     private function rest(Stamina $stamina): Controller
     {
-        if ($this->isResting()) { // TODO what about intentional healing
+        if ($this->isResting()) {
             $this->restedAmountOfFatigue = $stamina->rest(
                 $this->getSelectedRestPower(),
                 $this->getCalculatedFatigueBoundary(),
                 $this->getCalculatedEndurance(),
                 Tables::getIt()
             );
+            if ($this->restedAmountOfFatigue > 0) {
+                $this->lowerMemorizedFatigue($this->restedAmountOfFatigue);
+            }
         }
 
         return $this;
+    }
+
+    private function lowerMemorizedFatigue(int $restedFatigue): void
+    {
+        $remainingRestedFatigue = $restedFatigue;
+        $selectedFatigues = $this->getSelectedFatigues();
+        $updatedFatigueValues = [];
+        foreach ($selectedFatigues as $selectedFatigue) {
+            $currentlyRestedAmountOfFatigue = \min($selectedFatigue->getValue(), $remainingRestedFatigue);
+            $updatedFatigueValues[] = $selectedFatigue->getValue() - $currentlyRestedAmountOfFatigue;
+            $remainingRestedFatigue -= $currentlyRestedAmountOfFatigue;
+        }
+        // has to rewrite it as we use 'request' as current values
+        $this->rewriteValueFromRequest(self::FATIGUE, $updatedFatigueValues);
     }
 
     public function getSelectedRestPower(): RestPower
@@ -176,7 +213,7 @@ class Controller extends \DrdPlus\Configurator\Skeleton\Controller
     /**
      * @return array|SeriousWound[]
      */
-    public function getSeletedSeriousWounds(): array
+    public function getSelectedSeriousWounds(): array
     {
         return \array_filter($this->wounds, function (Wound $wound) {
             return $wound->isSerious();
@@ -211,7 +248,7 @@ class Controller extends \DrdPlus\Configurator\Skeleton\Controller
              * @var SeriousWoundOriginCode $seriousWoundOriginCode
              * @var WoundBoundary $woundBoundary
              */
-            $this->wounds[] = $health->createWound($woundSize, $seriousWoundOriginCode, $woundBoundary);
+            $this->wounds[] = $health->addWound($woundSize, $seriousWoundOriginCode, $woundBoundary);
             $this->rollAgainstMalusFromWoundsIfNeeded($health);
         }
 
@@ -231,8 +268,8 @@ class Controller extends \DrdPlus\Configurator\Skeleton\Controller
 
     public function getSelectedRollAgainstMalusFromWounds(): Roll2d6DrdPlus
     {
-        if (($this->newRollAgainstMalusFromWounds === null && $this->shouldRollAgainstMalusFromWounds()) // player demands it
-            || $this->haveToRollAgainstMalusFromWounds() // new wound happens, we have to re-roll
+        if (($this->newRollAgainstMalusFromWounds === null && $this->userRollAgainstMalusFromWounds()) // player demands it
+            || $this->haveToRollAgainstMalusFromWounds() // new wound or heal happens, we have to re-roll
         ) {
             $this->newRollAgainstMalusFromWounds = Roller2d6DrdPlus::getIt()->roll()->getValue();
         }
@@ -244,9 +281,29 @@ class Controller extends \DrdPlus\Configurator\Skeleton\Controller
         );
     }
 
-    public function shouldRollAgainstMalusFromWounds(): bool
+    public function getSelectedRollAgainstMalusFromFatigue(): Roll2d6DrdPlus
     {
-        return (bool)$this->getValueFromRequest(self::SHOULD_ROLL_AGAINST_MALUS_FROM_WOUNDS);
+        if (($this->newRollAgainstMalusFromFatigue === null && $this->shouldRollAgainstMalusFromFatigue()) // player demands it
+            || $this->haveToRollAgainstMalusFromFatigue() // new wound happens, we have to re-roll
+        ) {
+            $this->newRollAgainstMalusFromFatigue = Roller2d6DrdPlus::getIt()->roll()->getValue();
+        }
+
+        return Roller2d6DrdPlus::getIt()->generateRoll(
+            $this->newRollAgainstMalusFromFatigue
+            ?? $this->getValueFromRequest(self::ROLL_AGAINST_MALUS_FROM_FATIGUE)
+            ?? 6
+        );
+    }
+
+    public function shouldRollAgainstMalusFromFatigue(): bool
+    {
+        return (bool)$this->getValueFromRequest(self::SHOULD_ROLL_AGAINST_MALUS_FROM_FATIGUE);
+    }
+
+    public function userRollAgainstMalusFromWounds(): bool
+    {
+        return (bool)$this->getValueFromRequest(self::USER_ROLL_AGAINST_MALUS_FROM_WOUNDS);
     }
 
     private function getWoundsDetails(): array
@@ -254,7 +311,7 @@ class Controller extends \DrdPlus\Configurator\Skeleton\Controller
         $woundsDetails = [];
         $woundBoundary = $this->getCalculatedWoundBoundary();
         $selectedSeriousWoundOrigins = $this->selectedSeriousWoundOrigins();
-        foreach ($this->getSelectedWoundsSizes() as $index => $selectedWoundsSize) {
+        foreach ($this->getSelectedFreshWoundsSizes() as $index => $selectedWoundsSize) {
             $woundDetails['woundSize'] = $selectedWoundsSize;
             $woundDetails['seriousWoundOrigin'] = $selectedSeriousWoundOrigins[$index] ?? SeriousWoundOriginCode::findIt('');
             $woundDetails['woundBoundary'] = $woundBoundary;
@@ -267,13 +324,21 @@ class Controller extends \DrdPlus\Configurator\Skeleton\Controller
     /**
      * @return array|WoundSize[]
      */
-    public function getSelectedWoundsSizes(): array
+    public function getSelectedFreshWoundsSizes(): array
     {
-        $woundSizes = $this->getValueFromRequest(self::WOUND_SIZE);
-        if (!$woundSizes) {
+        return $this->createWoundSizes((array)$this->getValueFromRequest(self::FRESH_WOUND_SIZE));
+    }
+
+    /**
+     * @param array|int[] $woundValues
+     * @return array|WoundSize[]
+     */
+    private function createWoundSizes(array $woundValues): array
+    {
+        if (!$woundValues) {
             return [];
         }
-        $woundSizes = \array_filter($woundSizes, function ($woundSize) {
+        $woundValues = \array_filter($woundValues, function ($woundSize) {
             return $woundSize > 0;
         });
 
@@ -282,8 +347,16 @@ class Controller extends \DrdPlus\Configurator\Skeleton\Controller
                 /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
                 return WoundSize::createIt($woundSize);
             },
-            (array)$woundSizes
+            $woundValues
         );
+    }
+
+    /**
+     * @return array|WoundSize[]
+     */
+    public function getSelectedOldWoundsSizes(): array
+    {
+        return $this->createWoundSizes((array)$this->getValueFromRequest(self::OLD_WOUND_SIZE));
     }
 
     /**
@@ -333,15 +406,66 @@ class Controller extends \DrdPlus\Configurator\Skeleton\Controller
      * @throws \DrdPlus\Health\Exceptions\ExpectedFreshWoundToHeal
      * @throws \DrdPlus\Calculators\Rest\Exceptions\UnknownSeriousWoundToHeal
      */
+    private function regenerateFromWounds(Health $health): Controller
+    {
+        if ($this->isResting()) {
+            $this->regeneratedAmountOfWounds = $health->regenerate(
+                $this->getSelectedHealingPower(),
+                $this->getCalculatedToughness(),
+                Tables::getIt()
+            );
+            if ($this->regeneratedAmountOfWounds > 0) {
+                $this->refreshWoundSizeValuesFromRequest($health);
+                $this->rollAgainstMalusFromWoundsIfNeeded($health);
+            }
+        }
+
+        return $this;
+    }
+
+    private function refreshWoundSizeValuesFromRequest(Health $health): void
+    {
+        $oldWoundSizes = [];
+        foreach ($health->getUnhealedOldWounds() as $unhealedOldWound) {
+            $oldWoundSizes[] = $unhealedOldWound->getValue();
+        }
+        $freshWoundSizes = [];
+        foreach ($health->getUnhealedFreshWounds() as $unhealedFreshWound) {
+            $freshWoundSizes[] = $unhealedFreshWound->getValue();
+        }
+        // has to rewrite it as we use 'request' as current values
+        $this->rewriteValueFromRequest(self::FRESH_WOUND_SIZE, $freshWoundSizes);
+        $this->rewriteValueFromRequest(self::OLD_WOUND_SIZE, $oldWoundSizes);
+    }
+
+    /**
+     * @return int
+     */
+    public function getRegeneratedAmountOfWounds(): int
+    {
+        return $this->regeneratedAmountOfWounds;
+    }
+
+    /**
+     * @param Health $health
+     * @return Controller
+     * @throws \DrdPlus\Health\Exceptions\NeedsToRollAgainstMalusFromWoundsFirst
+     * @throws \DrdPlus\Health\Exceptions\UnknownSeriousWoundToHeal
+     * @throws \DrdPlus\Health\Exceptions\ExpectedFreshWoundToHeal
+     * @throws \DrdPlus\Calculators\Rest\Exceptions\UnknownSeriousWoundToHeal
+     */
     private function healWounds(Health $health): Controller
     {
-        if ($this->isResting()) { // TODO what about intentional healing
+        return $this;
+        // TODO
+        if ($this->isResting()) {
             $selectedSeriousWoundToHeal = $this->getSelectedSeriousWoundToHeal();
             if ($selectedSeriousWoundToHeal) {
                 $this->healedAmountOfSeriousWound = $this->healSeriousWound($selectedSeriousWoundToHeal, $health);
             } else {
                 $this->healedAmountOfOrdinaryWounds = $this->healOrdinaryWounds($health);
             }
+            $this->refreshWoundSizeValuesFromRequest($health);
         }
 
         return $this;
@@ -349,7 +473,7 @@ class Controller extends \DrdPlus\Configurator\Skeleton\Controller
 
     public function isResting(): bool
     {
-        return (bool)$this->getValueFromRequest(self::RESTING);
+        return !empty($_POST[self::RESTING]);
     }
 
     /**
@@ -390,7 +514,7 @@ class Controller extends \DrdPlus\Configurator\Skeleton\Controller
      */
     private function getSelectedSeriousWoundToHeal(): ?SeriousWound
     {
-        $seriousWounds = $this->getSeletedSeriousWounds();
+        $seriousWounds = $this->getSelectedSeriousWounds();
         if (!$seriousWounds) {
             return null;
         }
@@ -668,6 +792,11 @@ class Controller extends \DrdPlus\Configurator\Skeleton\Controller
         return $this->health->mayHaveMalusFromWounds($this->getCalculatedWoundBoundary()) > 0;
     }
 
+    public function mayHaveMalusFromFatigue(): bool
+    {
+        return $this->stamina->mayHaveMalusFromFatigue($this->getCalculatedFatigueBoundary()) > 0;
+    }
+
     public function getTotalRollAgainstMalusFromWounds(): int
     {
         return $this->getFinalWill()->getValue() + $this->getSelectedRollAgainstMalusFromWounds()->getValue();
@@ -675,10 +804,21 @@ class Controller extends \DrdPlus\Configurator\Skeleton\Controller
 
     public function haveToRollAgainstMalusFromWounds(): bool
     {
-        $previousWoundsCount = \count((array)$this->getHistory()->getValue(self::WOUND_SIZE));
-        $currentWoundsCount = \count($this->getSelectedWoundsSizes());
+        $previousFreshWoundsSum = \array_sum((array)$this->getHistory()->getValue(self::FRESH_WOUND_SIZE));
+        $previousOldWoundsSum = \array_sum((array)$this->getHistory()->getValue(self::OLD_WOUND_SIZE));
+        $currentFreshWoundsSum = \array_sum($this->getSelectedFreshWoundsSizes());
+        $currentOldWoundsSum = \array_sum($this->getSelectedOldWoundsSizes());
 
-        return $previousWoundsCount < $currentWoundsCount;
+        // of previous wounds were lower, then we are freshly wounded or if lesser then we are freshly healed
+        return ($previousOldWoundsSum + $previousFreshWoundsSum) !== ($currentOldWoundsSum + $currentFreshWoundsSum);
+    }
+
+    public function haveToRollAgainstMalusFromFatigue(): bool
+    {
+        $previousFatigueCount = \count((array)$this->getHistory()->getValue(self::FATIGUE));
+        $currentFatiguesCount = \count($this->getSelectedFatigues());
+
+        return $previousFatigueCount < $currentFatiguesCount;
     }
 
     public function getFormattedBonus(int $bonus): string
@@ -701,5 +841,13 @@ class Controller extends \DrdPlus\Configurator\Skeleton\Controller
     public function getTotalFatigue(): int
     {
         return $this->stamina->getFatigue()->getValue();
+    }
+
+    /**
+     * @return int
+     */
+    public function getRestedAmountOfFatigue(): int
+    {
+        return $this->restedAmountOfFatigue;
     }
 }
