@@ -9,6 +9,7 @@ use DrdPlus\Codes\RaceCode;
 use DrdPlus\Codes\SubRaceCode;
 use DrdPlus\DiceRolls\Templates\Rollers\Roller2d6DrdPlus;
 use DrdPlus\DiceRolls\Templates\Rolls\Roll2d6DrdPlus;
+use DrdPlus\FrontendSkeleton\HtmlHelper;
 use DrdPlus\Health\Afflictions\Affliction;
 use DrdPlus\Health\HealingPower;
 use DrdPlus\Health\Health;
@@ -106,7 +107,17 @@ class RestController extends \DrdPlus\CalculatorSkeleton\CalculatorController
         array $selectedValues = null
     )
     {
-        parent::__construct($sourceCodeUrl, 'rest' /* cookies postfix */, $documentRoot, $vendorRoot, $partsRoot, $genericPartsRoot, $cookiesTtl, $selectedValues);
+        parent::__construct(
+            HtmlHelper::createFromGlobals($documentRoot),
+            $sourceCodeUrl,
+            'rest' /* cookies postfix */,
+            $documentRoot,
+            $vendorRoot,
+            $partsRoot,
+            $genericPartsRoot,
+            $cookiesTtl,
+            $selectedValues
+        );
         $health = new Health();
         $this->addWounds($health)
             ->addAfflictions($health)

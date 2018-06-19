@@ -1104,12 +1104,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/jaroslavtyc/drd-plus-calculator-skeleton.git",
-                "reference": "3a33d79757825eaeef501f58217e48a389926ccb"
+                "reference": "0d0ef4b45627cab768d1837a39fede619d7cc7b3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/jaroslavtyc/drd-plus-calculator-skeleton/zipball/3a33d79757825eaeef501f58217e48a389926ccb",
-                "reference": "3a33d79757825eaeef501f58217e48a389926ccb",
+                "url": "https://api.github.com/repos/jaroslavtyc/drd-plus-calculator-skeleton/zipball/0d0ef4b45627cab768d1837a39fede619d7cc7b3",
+                "reference": "0d0ef4b45627cab768d1837a39fede619d7cc7b3",
                 "shasum": ""
             },
             "require": {
@@ -1137,7 +1137,7 @@
                 "MIT"
             ],
             "description": "Style and functionality helper of a DrD+ calculator",
-            "time": "2018-06-14 05:23:43"
+            "time": "2018-06-19 11:51:00"
         },
         {
             "name": "drd-plus/codes",
@@ -1242,12 +1242,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/jaroslavtyc/drd-plus-frontend-skeleton.git",
-                "reference": "dbabca053e1a7f63733d83fa4e4c6121f6be3d36"
+                "reference": "770e275785cb10bcb78b72cc11564155cb53d315"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/jaroslavtyc/drd-plus-frontend-skeleton/zipball/dbabca053e1a7f63733d83fa4e4c6121f6be3d36",
-                "reference": "dbabca053e1a7f63733d83fa4e4c6121f6be3d36",
+                "url": "https://api.github.com/repos/jaroslavtyc/drd-plus-frontend-skeleton/zipball/770e275785cb10bcb78b72cc11564155cb53d315",
+                "reference": "770e275785cb10bcb78b72cc11564155cb53d315",
                 "shasum": ""
             },
             "require": {
@@ -1288,7 +1288,7 @@
                 "pages",
                 "view"
             ],
-            "time": "2018-06-14 05:15:13"
+            "time": "2018-06-19 14:52:29"
         },
         {
             "name": "drd-plus/health",

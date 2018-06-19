@@ -1,1 +1,1 @@
-<?php include __DIR__ . '/../vendor/drd-plus/calculator-skeleton/history_deletion.php';
+<?php include __DIR__ . '/../../vendor/drd-plus/calculator-skeleton/web/01 history deletion.php';
