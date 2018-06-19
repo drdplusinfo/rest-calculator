@@ -1,5 +1,5 @@
 <?php
-namespace DrdPlus\Calculators\Rest\Exceptions;
+namespace DrdPlus\RestCalculator\Exceptions;
 
 interface Runtime extends Exception
 {

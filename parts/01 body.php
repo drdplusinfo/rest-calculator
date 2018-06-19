@@ -1,7 +1,7 @@
 <?php
 namespace DrdPlus\Calculators\Rest;
 
-/** @var \DrdPlus\Calculators\Rest\Controller $controller */
+/** @var \DrdPlus\Calculators\Rest\RestController $controller */
 ?>
 <fieldset class="panel">
   <div class="block">
