@@ -1,5 +1,5 @@
 {
-  "name": "drd-plus/rest-calculator",
+  "name": "drdplus/rest-calculator",
   "license": "MIT",
   "type": "project",
   "description": "Healing and resting in DrD+",
@@ -19,11 +19,11 @@
   "require": {
     "php": ">=7.1",
     "granam/strict-object": "dev-master",
-    "drd-plus/tables": "dev-master",
-    "drd-plus/calculator-skeleton": "dev-master",
-    "drd-plus/skills": "dev-master",
-    "drd-plus/health": "dev-master",
-    "drd-plus/stamina": "dev-master"
+    "drdplus/tables": "dev-master",
+    "drdplus/calculator-skeleton": "dev-master",
+    "drdplus/skills": "dev-master",
+    "drdplus/health": "dev-master",
+    "drdplus/stamina": "dev-master"
   },
   "require-dev": {
     "roave/security-advisories": "dev-master",
@@ -35,10 +35,10 @@
   "prefer-stable": true,
   "scripts": {
     "pre-autoload-dump": [
-      "rm -f DrdPlus/Tests/CalculatorSkeleton && ln -s ../../vendor/drd-plus/calculator-skeleton/DrdPlus/Tests/CalculatorSkeleton DrdPlus/Tests/",
-      "rm -fr ./css/generic && cp -r ./vendor/drd-plus/calculator-skeleton/css/generic ./css/",
-      "rm -f ./js/generic && ln -s ../vendor/drd-plus/calculator-skeleton/js/generic ./js/",
-      "rm -f ./images/generic && ln -s ../vendor/drd-plus/calculator-skeleton/images/generic ./images/",
+      "rm -f DrdPlus/Tests/CalculatorSkeleton && ln -s ../../vendor/drdplus/calculator-skeleton/DrdPlus/Tests/CalculatorSkeleton DrdPlus/Tests/",
+      "rm -fr ./css/generic && cp -r ./vendor/drdplus/calculator-skeleton/css/generic ./css/",
+      "rm -f ./js/generic && ln -s ../vendor/drdplus/calculator-skeleton/js/generic ./js/",
+      "rm -f ./images/generic && ln -s ../vendor/drdplus/calculator-skeleton/images/generic ./images/",
       "find ./cache -mindepth 2 -type f -exec rm {} +"
     ],
     "post-update-cmd": [
